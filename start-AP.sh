@@ -23,9 +23,30 @@ RANDOMIZE(){
 WLAN(){
 	if ! ip -4 addr show wlan1 | grep -q '10.10.10.1/24'; then
 		sudo ip addr replace 10.10.10.1/24 dev wlan1
-		sudo ip link set wlan1 up
 		echo "[+] WLAN1 configured!"
 	fi
+}
+
+
+#Configure IPtables rules
+
+IPTABLES() {
+    echo "[*] Configuring iptables..."
+
+    for IFACE in eth0 wlan0; do
+
+        # NAT masquerading
+        sudo iptables -t nat -C POSTROUTING -s 10.10.10.0/24 -o "$IFACE" -j MASQUERADE 2>/dev/null || sudo iptables -t nat -A POSTROUTING -s 10.10.10.0/24 -o "$IFACE" -j MASQUERADE || return 1
+
+        # Allow outbound traffic from wlan1
+        sudo iptables -C FORWARD -i wlan1 -o "$IFACE" -s 10.10.10.0/24 -j ACCEPT 2>/dev/null || sudo iptables -A FORWARD -i wlan1 -o "$IFACE" -s 10.10.10.0/24 -j ACCEPT || return 1
+
+        # Allow established return traffic
+        sudo iptables -C FORWARD -i "$IFACE" -o wlan1 -d 10.10.10.0/24 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT 2>/dev/null || sudo iptables -A FORWARD -i "$IFACE" -o wlan1 -d 10.10.10.0/24 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT || return 1
+
+    done
+
+    echo "[+] iptables configured successfully!"
 }
 
 ## Start Hostapd
@@ -115,6 +136,7 @@ FORWARDING(){
 RANDOMIZE || exit 1
 WLAN || exit 1
 FORWARDING || exit 1
+IPTABLES || exit 1
 DNSMASQ || exit 1
 HOSTAPD || exit 1
 
