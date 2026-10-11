@@ -55,6 +55,70 @@ My original hostapd.conf had `wpa=3` which is WPA an WPA2 authentication, I chan
 
 # Scripts
 I write the randmize-mac.sh and the start-AP.sh and realized there was an issue when I would stop and restart hostapd and dnsmasq that my phone would not reliably connect back to the new BSSID of the AP, using the assistance of AI. I narrowed it down to the fact that since my BSSID was being randomized on each initializaiton my phone was having a hard time realizing the BSSID was different causing the "Incorrect Password" issue. By removing `sudo ip link set wlan1 up` from my mac randomizer script and allowing hostapd to initialize the interface that seemed to fix the issue.
+```bash
+IPTABLES() {
+    echo "[*] Configuring iptables..."
+
+    for IFACE in eth0 wlan0; do
+
+        # NAT masquerading
+        sudo iptables -t nat -C POSTROUTING -s 10.10.10.0/24 -o "$IFACE" -j MASQUERADE 2>/dev/null || sudo iptables -t nat -A POSTROUTING -s 10.10.10.0/24 -o "$IFACE" -j MASQUERADE || return 1
+
+        # Allow outbound traffic from wlan1
+        sudo iptables -C FORWARD -i wlan1 -o "$IFACE" -s 10.10.10.0/24 -j ACCEPT 2>/dev/null || sudo iptables -A FORWARD -i wlan1 -o "$IFACE" -s 10.10.10.0/24 -j ACCEPT || return 1
+
+        # Allow established return traffic
+        sudo iptables -C FORWARD -i "$IFACE" -o wlan1 -d 10.10.10.0/24 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT 2>/dev/null || sudo iptables -A FORWARD -i "$IFACE" -o wlan1 -d 10.10.10.0/24 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT || return 1
+
+    done
+
+    echo "[+] iptables configured successfully!"
+}
+```
+(assisted with AI)
+This function here is the way that my Pi knows what connections have been made, and where to route the traffic. It starts with the MASQUERADING of both eth0 and wlan0 ensuring that the traffic can flow from wlan1 to eth0/wlan0 and back
+
+Next is the outbound Traffic rules. Using the -C it checks if the rule already exists and if not then it applies a forward from in the wlan1(AP) out either wlan0/eth0. This is so that my connection on wlan1 can be forwarded to the AP that my wlan0 or eth0 is connected to.
+
+Finally is the return traffic. Using conntrack,ESTABLISHED and RELATED this lets the already existing connection receive the traffic coming back from the AP connected to wlan0 or eth0 reaches the desired host connected to wlan1 AP.
+
+```bash
+# Only act when an IPv4 lease is acquired or updated
+case "$reason" in
+    BOUND|RENEW|REBIND|REBOOT)
+        ;;
+    *)
+        return 0
+        ;;
+esac
+
+# Assign interface priorities
+case "$interface" in
+    eth0)
+        METRIC=100
+        ;;
+    wlan0)
+        METRIC=200
+        ;;
+    *)
+        return 0
+        ;;
+esac
+
+# Use the first gateway received from DHCP
+GATEWAY=${new_routers%% *}
+
+# Ensure a gateway was supplied
+[ -n "$GATEWAY" ] || return 0
+
+# Install the preferred default route
+ip -4 route replace default \
+    via "$GATEWAY" \
+    dev "$interface" \
+    metric "$METRIC"
+
+```
+This script is part of the DHCLIENT hooks, essentailly based off te different DHCP events that can happen depending on if it sees eth0 or wlan0 will set the route metrics, gateway and interface. This works along side the iptables rules to allow traffic to flow from either eth0 or wlan0.
 # Links and other info:
 #### Github Repo
 [Git](https://github.com/anth-ny0/Pi-Travel-Router)
@@ -72,4 +136,8 @@ HOME_URL="https://www.debian.org/"
 SUPPORT_URL="https://www.debian.org/support"
 BUG_REPORT_URL="https://bugs.debian.org/"
 ```
+
+
+
+
 

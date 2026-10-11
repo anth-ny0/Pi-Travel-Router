@@ -1,0 +1,33 @@
+# Only act when an IPv4 lease is acquired or updated
+case "$reason" in
+    BOUND|RENEW|REBIND|REBOOT)
+        ;;
+    *)
+        return 0
+        ;;
+esac
+
+# Assign interface priorities
+case "$interface" in
+    eth0)
+        METRIC=100
+        ;;
+    wlan0)
+        METRIC=200
+        ;;
+    *)
+        return 0
+        ;;
+esac
+
+# Use the first gateway received from DHCP
+GATEWAY=${new_routers%% *}
+
+# Ensure a gateway was supplied
+[ -n "$GATEWAY" ] || return 0
+
+# Install the preferred default route
+ip -4 route replace default \
+    via "$GATEWAY" \
+    dev "$interface" \
+    metric "$METRIC"
