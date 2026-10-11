@@ -94,7 +94,27 @@ DNSMASQ(){
 
 }
 
-RANDOMIZE
-WLAN
-DNSMASQ
-HOSTAPD
+FORWARDING(){
+	local CHECK_NUM=$(sudo sysctl -p | awk '{print $3}')
+	
+	echo "[*] Checking IP Forwarding!"
+	sleep 1
+
+	if [[ ${CHECK_NUM} == 0 ]]; then 
+		echo" [+] Setting IP Forwarding to 1!"
+		sleep 1
+		sudo sysctl -w net.ipv4.ip_forward=1
+		echo "[+] IP Forwarding set to 1!"
+	else
+		echo "[+]IP Forwarding is already set to 1!"
+	fi
+}
+
+
+
+RANDOMIZE || exit 1
+WLAN || exit 1
+FORWARDING || exit 1
+DNSMASQ || exit 1
+HOSTAPD || exit 1
+

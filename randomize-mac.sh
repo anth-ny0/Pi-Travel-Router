@@ -11,7 +11,6 @@ check(){
 randomize(){
 	sudo ip link set wlan1 down
 	sudo macchanger -r wlan1 > /dev/null 
-	sudo ip link set wlan1 up
 	exit 0
 }
 
