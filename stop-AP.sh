@@ -29,7 +29,7 @@ kill_router(){
 	echo "[*] Turning off DHCP SERVER..."
 	sleep 3
 
-	echo "Pi-Travel-Router is DOWN!"
+	echo "[+] Pi-Travel-Router is DOWN!"
 }
 check_process || exit 1
 kill_router || exit 1

@@ -1,3 +1,4 @@
+#!/bin/bash
 ## Configure Statis IP on wlan1
 WLAN(){
 	if ! ip -4 addr show wlan1 | grep -q '10.10.10.1/24'; then
@@ -6,13 +7,28 @@ WLAN(){
 	fi
 }
 
+# Start WG TUN
+
+START_WG(){
+	echo "[*] Starting Wireguard..."
+	sudo systemctl start wg-quick@wg0 > /dev/null
+
+	if ! sudo wg > /dev/null; then
+		echo "[-] Failed to start Wireguard @ wg0"
+		exit 1
+	fi
+
+
+}
+
+
 
 #Configure IPtables rules
 
 IPTABLES() {
     echo "[*] Configuring iptables..."
 
-    for IFACE in eth0 wlan0; do
+    for IFACE in eth0 wlan0 wg0; do
 
         # NAT masquerading
         sudo iptables -t nat -C POSTROUTING -s 10.10.10.0/24 -o "$IFACE" -j MASQUERADE 2>/dev/null || sudo iptables -t nat -A POSTROUTING -s 10.10.10.0/24 -o "$IFACE" -j MASQUERADE || return 1
@@ -114,6 +130,7 @@ FORWARDING(){
 
 
 WLAN || exit 1
+START_WG || exit 1
 FORWARDING || exit 1
 IPTABLES || exit 1
 DNSMASQ || exit 1

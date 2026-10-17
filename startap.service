@@ -1,0 +1,14 @@
+[Unit]
+Description= Start AP
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStartPre=/usr/bin/sh -c 'until /usr/bin/ping -c 1 -W 2 1.1.1.1 >/dev/null 2>&1; do sleep 3; done'
+ExecStart=/home/user/Router/Pi-Travel-Router/start-AP.sh
+Restart=on-failure
+TimeoutStartSec=0
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
