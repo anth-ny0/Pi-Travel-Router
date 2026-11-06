@@ -31,13 +31,19 @@ IPTABLES() {
     for IFACE in eth0 wlan0 wg0; do
 
         # NAT masquerading
-        sudo iptables -t nat -C POSTROUTING -s 10.10.10.0/24 -o "$IFACE" -j MASQUERADE 2>/dev/null || sudo iptables -t nat -A POSTROUTING -s 10.10.10.0/24 -o "$IFACE" -j MASQUERADE || return 1
+        sudo iptables -t nat -C POSTROUTING -o "$IFACE" -j MASQUERADE 2>/dev/null || sudo iptables -t nat -A POSTROUTING -o "$IFACE" -j MASQUERADE || return 1
 
         # Allow outbound traffic from wlan1
-        sudo iptables -C FORWARD -i wlan1 -o "$IFACE" -s 10.10.10.0/24 -j ACCEPT 2>/dev/null || sudo iptables -A FORWARD -i wlan1 -o "$IFACE" -s 10.10.10.0/24 -j ACCEPT || return 1
+        sudo iptables -C FORWARD -i wlan1 -o "$IFACE" -j ACCEPT 2>/dev/null || sudo iptables -A FORWARD -i wlan1 -o "$IFACE" -j ACCEPT || return 1
 
         # Allow established return traffic
-        sudo iptables -C FORWARD -i "$IFACE" -o wlan1 -d 10.10.10.0/24 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT 2>/dev/null || sudo iptables -A FORWARD -i "$IFACE" -o wlan1 -d 10.10.10.0/24 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT || return 1
+        sudo iptables -C FORWARD -i "$IFACE" -o wlan1 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT 2>/dev/null || sudo iptables -A FORWARD -i "$IFACE" -o wlan1 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT || return 1
+
+	# Enable Traffic from eth0 if just hardlined through wg0
+	sudo iptables -C FORWARD -i eth0 -o wg0 -j ACCEPT 2>/dev/null || sudo iptables -A FORWARD -i eth0 -o wg0 -j ACCEPT
+
+	# Enable the return Traffic 
+	sudo iptables -C FORWARD -i wg0 -o eth0 -m conntrack --cstate ESTABLISHED,RELATED -j ACCEPT 2>/dev/null || sudo iptables -A FORWARD -i wg0 -o eth0 -m conntrack --cstate ESABLISHED,RELATED -j ACCEPT
 
     done
 

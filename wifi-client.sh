@@ -1,4 +1,6 @@
+#!/usr/bin/env bash
 
+SKIP="0"
 
 ## Connecting wlan0 to an actual network.
 
@@ -12,6 +14,7 @@ if [[ $(cat /sys/class/net/eth0/carrier 2>/dev/null) == 1 ]] &&
    ping -I eth0 -c 2 -W 2 1.1.1.1 &>/dev/null; then
 
     echo "[+] Ethernet has internet!"
+    SKIP="1"
 else
     echo "[-] Ethernet unavailable. Using Wi-Fi."
     
@@ -25,9 +28,9 @@ SUPPLICANT(){
 	if pgrep -x wpa_supplicant >/dev/null; then
 		sudo killall wpa_supplicant 
 		sleep 5
-		sudo wpa_supplicant -B -i wlan0 -c wlan0.conf >/dev/null
+		sudo wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/wlan0.conf >/dev/null
 	else
-		sudo wpa_supplicant -B -i wlan0 -c wlan0.conf >/dev/null
+		sudo wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/wlan0.conf >/dev/null
 	fi
 
 	echo "[+] wpa_supplicant successfull started!"
@@ -55,5 +58,6 @@ SUPPLICANT(){
 	
 }
 
-
-SUPPLICANT
+if [[ $SKIP -eq 0 ]]; then
+	SUPPLICANT
+fi
