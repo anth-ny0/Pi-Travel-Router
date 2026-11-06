@@ -1,0 +1,43 @@
+#!/bin/bash
+
+
+# Generate a random number between 1 and 5
+number=$((RANDOM % 5 + 1))
+
+# Use a case statement to echo a sentence based on the random number
+case $number in
+    1)
+	echo "Run ngw-dhclient, you must. Connect to the network, it will. But patience, young padawan—route weight errors, a dark side they are.. Use /sbin/dhclient if you know what you\'re doing.."
+        ;;
+    2)
+	echo "To run, or not to run: that is the question.
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of a misconfigured network,
+Or to take arms against a sea of DHCP woes
+And by opposing, end them.
+To connect: to stream—
+No more; and by a stream to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to, 'tis a consummation
+Devoutly to be wished.
+To connect, to stream—
+To stream: perchance to dream—
+Aye, there’s the rub,
+For in that dream of perfect packets,
+What errors may come when we have shuffled off
+This mortal client,
+Must give us pause—
+Therein lies the lag.
+
+Use /sbin/dhclient if you must..."
+        ;;
+    3)
+	echo "Let’s just add a happy little ngw-dhclient here. No mistakes, just happy little connections. Use /sbin/dhclient if you know what you're doing..."
+        ;;
+    4)
+	echo "DHCPACK or DHCPNACK, there is no DHCPTRY. Use /sbin/dhclient if you know what you\'re doing..."
+        ;;
+    5)
+	echo "Confucius say: Man who rely on dhclient may find his network as unstable as a tightrope walker in a windstorm. Use /sbin/dhclient if you must..."
+        ;;
+esac

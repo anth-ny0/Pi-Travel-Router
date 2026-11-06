@@ -1,0 +1,6 @@
+[Match]
+Type=wlan
+
+[Link]
+AlternativeNamesPolicy=mac
+MACAddressPolicy=random

@@ -1,0 +1,2 @@
+# Automatically unblock rfkill when wireless devices are added
+ACTION=="add", SUBSYSTEM=="ieee80211", RUN+="/bin/sh -c '/usr/sbin/rfkill unblock all'"

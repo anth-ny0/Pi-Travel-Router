@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Function to set TTL value
+set_ttl() {
+    echo "Setting TTL value to $1"
+    sudo sysctl -w net.ipv4.ip_default_ttl="$1"
+    sudo sysctl -w net.ipv6.conf.all.hop_limit="$1"
+}
+
+# Function to display usage message
+usage() {
+    echo "Usage: $0 linux|android|default|windows|macos|ios|<number>"
+    exit 1
+}
+
+# Main script starts here
+if [ "$#" -ne 1 ]; then
+    usage
+fi
+
+case "$1" in
+    linux|android|default|macos|ios)
+	set_ttl 64
+        ;;
+    windows)
+        set_ttl 128
+        ;;
+    [0-9]*)
+	set_ttl "$1"
+        ;;
+    *)
+        usage
+        ;;
+esac

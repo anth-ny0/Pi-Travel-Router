@@ -1,0 +1,8 @@
+[Match]
+Type=wlan
+MACAddress=aa:bb:cc:dd:ee:ff
+
+[Link]
+AlternativeNamesPolicy=mac
+MACAddressPolicy=random
+Name=CardNameHere

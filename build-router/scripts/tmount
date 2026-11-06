@@ -1,0 +1,40 @@
+#!/bin/bash
+# tmount
+
+# Default device
+DEVICE="/dev/sda2"
+
+# Function to display help
+show_help() {
+    echo "Usage: tmount [DEVICE]"
+    echo
+    echo "Mount a LUKS encrypted device."
+    echo
+    echo "Arguments:"
+    echo "  DEVICE      The device to mount (default: /dev/sda2)"
+    echo
+    echo "Options:"
+    echo "  -h, --help  Show this help message and exit"
+}
+
+# Check for command line arguments
+# Check for help flags
+for arg in "$@"; do
+case $arg in
+    -h|--help)
+        show_help
+    exit 0
+    ;;
+esac
+done
+
+if [[ $# -gt 0 ]]; then
+        DEVICE="$1"
+fi
+
+# Open the LUKS device
+sudo cryptsetup --type luks open "$DEVICE" tools
+
+# Mount the filesystem
+sudo mount -t ext4 /dev/mapper/tools /opt/tools
+

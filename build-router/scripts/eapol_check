@@ -1,0 +1,12 @@
+#!/bin/bash
+# Usage/help message
+function usage() {
+        echo "Usage: eapol_check <handshake.pcap>"
+}
+if [ $# -eq 0 ]
+then
+	usage
+	exit 1
+fi
+
+tshark -r $1 -Y eapol -E header=y -T fields -e wlan_rsna_eapol.keydes.msgnr -e wlan.sa -e wlan.da -e wlan_rsna_eapol.keydes.nonce -e wlan.rsn.ie.pmkid 2> /dev/null | column -t |uniq

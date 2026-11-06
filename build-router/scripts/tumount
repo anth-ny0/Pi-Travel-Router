@@ -1,0 +1,29 @@
+#!/bin/bash
+# tumount
+
+# Function to display help
+show_help() {
+    echo "Usage: tumount"
+    echo
+    echo "Unmount a previously mounted LUKS encrypted device."
+    echo
+    echo "Options:"
+    echo "  -h, --help  Show this help message and exit"
+}
+
+# Check for help flags
+for arg in "$@"; do
+    case $arg in
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+    esac
+done
+
+# Unmount the filesystem
+sudo umount /opt/tools
+
+# Close the LUKS device
+sudo cryptsetup close tools
+

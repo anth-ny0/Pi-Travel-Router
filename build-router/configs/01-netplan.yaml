@@ -1,0 +1,22 @@
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    usb0:
+      dhcp4: true
+      dhcp4-overrides:
+        route-metric: 2
+
+    eth0:
+      dhcp4: true
+      accept-ra: false           # don't solicit IPv6 routes
+      optional: true             # don’t block boot if DHCP isn’t available
+      dhcp4-overrides:
+        route-metric: 1          # preferred default route when DHCP works
+      addresses:
+        - 10.10.0.1/24            # static fallback if DHCP fails
+
+    wlan0:
+      dhcp4: true
+      optional: true             # don’t block boot if DHCP isn’t available
+

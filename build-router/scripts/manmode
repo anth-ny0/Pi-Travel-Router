@@ -1,0 +1,113 @@
+#!/bin/bash
+
+# Usage/help message
+function usage() {
+        echo "
+
+#############################################################################
+
+                                USAGE
+
+Use this script to switch your interface to managed mode
+
+usage: monmode [Options]
+
+required arguments:
+        -i|--interface		the interface you what to set
+
+optional arguments:
+        -m|--mac		mac address you want to set for the interface. 
+				For random, use '-m random'
+        -h|--help               print this help message
+
+#############################################################################
+
+"
+}
+
+# if no args are given, print the help message
+if [ $# -eq 0 ]
+then
+        usage
+        exit 0
+fi
+
+# parse through the arguments
+POSITIONAL_ARGS=()
+
+while [[ $# -gt 0 ]]
+do
+        case $1 in
+                -h|--help)
+                        usage
+                        exit 0
+                        ;;
+                -i|--interface)
+                        IFACE="$2"
+                        shift
+                        shift
+                        ;;
+                -m|--mac)
+                        MAC="$2"
+                        shift
+                        shift
+                        ;;
+                -*|--*)
+                        echo "[-] Unknown option $1"
+                        usage
+                        exit 1
+                        ;;
+                *)
+                        POSITIONAL_ARGS+=("$1")
+                        shift
+                        ;;
+        esac
+done
+
+set -- ""
+
+# verify that at least -i was set
+if [[ ${IFACE} == "" ]]
+then
+        echo "[-] Required Argument: -i|--interface <INTERFACE>"
+        usage
+        exit 1
+fi
+
+# Verify IFACE is valid
+if ! ip link show ${IFACE} 1> /dev/null 2>&1
+then
+	echo "[-] ${IFACE} is not a valid interface. Exiting"
+	exit 1
+fi
+
+if [[ ${MAC}  == "random" ]]
+then
+        sudo ip link set ${IFACE} down
+        sudo macchanger -r ${IFACE}
+        if [ $? -ne 0 ]
+        then
+               echo "[-] Unable to set MAC to ${MAC}. Exiting.."
+               exit 1
+        fi
+	sudo iw ${IFACE} set type managed
+        sudo ip link set ${IFACE} up
+elif [[ ${MAC} == "" ]]
+then
+        sudo ip link set ${IFACE} down
+	sudo iw ${IFACE} set type managed
+        sudo ip link set ${IFACE} up
+else
+        sudo ip link set ${IFACE} down
+        sudo macchanger -m ${MAC} ${IFACE}
+        if [ $? -ne 0 ]
+        then
+                echo "[-] Unable to set MAC to ${MAC}. Exiting.."
+                exit 1
+        fi
+	sudo iw ${IFACE} set type managed
+        sudo ip link set ${IFACE} up
+fi
+
+echo [+] Successfully changed ${IFACE} to managed mode.
+exit 0

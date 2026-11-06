@@ -1,0 +1,10 @@
+[Unit]
+Description=Set WiFi regulatory domain to US
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/iw reg set US
+
+[Install]
+WantedBy=multi-user.target
