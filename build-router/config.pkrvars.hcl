@@ -49,7 +49,8 @@ packages = [
     "wpasupplicant",
     "dnsmasq",
     "hostapd",
-    "wireguard"
+    "wireguard",
+    "iptables-persistent"
 ]
 
 # Set the terminal prompt Color Options are: red, yellow, blue, magenta, black, cyan
