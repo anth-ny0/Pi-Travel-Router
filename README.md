@@ -93,8 +93,9 @@ The image enables `startap.service`, which runs the AP startup script after its 
 
 ### Configuring the Router after Building
 
-If you want to configure settings for the AP you need to edit `/etc/hostapd/hostapd.conf'.
-IF you want to confiure setting for the DHCP you need to edit '/etc/dnsmasq.conf'.
+For configuration of the AP specific settings edit this file - `/etc/hostapd/hostapd.conf'.
+
+For configuration of the DHCP specific settings edit this file - 'etc/dnsmasq.conf'.
 
 Useful Pi commands:
 
