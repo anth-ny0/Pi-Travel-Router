@@ -93,7 +93,7 @@ The image enables `startap.service`, which runs the AP startup script after its 
 
 ### Configuring the Router after Building
 
-- `/etc/hostapd/hostapd.conf' -- Configure AP settings.
+- `/etc/hostapd/hostapd.conf` -- Configure AP settings.
 - `/etc/dnsmasq.conf` -- Configure DHCP settings.
 
 Useful Pi commands:
