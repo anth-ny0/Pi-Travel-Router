@@ -84,8 +84,10 @@ The Docker/Packer build produces the `.img` file in `build-router/`. In **Raspbe
 ## Using the router
 
 1. Boot the Pi with the USB AP adapter attached. Connect `eth0` to an internet uplink, or set up upstream Wi-Fi on `wlan0`.
-2. For a Wi-Fi uplink, SSH into the Pi and run `sudo /opt/xbin/wifi-client.sh` to select a network.
-3. Connect your phone or laptop to the SSID you set in `hostapd.conf`.
+2. If using Ethernet - The pi will auto detect Ethernet and start the AP to the set settings of `hostapd.conf`.
+3. If using WiFi - connect an ethernet cable and setup your device to have the IP of `10.10.0.2' and make a route to '10.10.0.1'.
+4. SSH into the Pi and run 'connect' - This is a script that starts connecting over WiFi. 
+5. Connect your phone or laptop to the SSID you set in `hostapd.conf`.
 
 The image enables `startap.service`, which runs the AP startup script after its internet connectivity check succeeds.
 
