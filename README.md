@@ -91,6 +91,11 @@ The Docker/Packer build produces the `.img` file in `build-router/`. In **Raspbe
 
 The image enables `startap.service`, which runs the AP startup script after its internet connectivity check succeeds.
 
+### Configuring the Router after Building
+
+If you want to configure settings for the AP you need to edit `/etc/hostapd/hostapd.conf'.
+IF you want to confiure setting for the DHCP you need to edit '/etc/dnsmasq.conf'.
+
 Useful Pi commands:
 
 ```bash
